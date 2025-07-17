@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tech for Girls Registration</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    #tsparticles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      width: 200%;
+      height: 100%;
+    }
+
+    form {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 50px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    input:focus, select:focus {
+      border-color: #a6c1ee;
+      outline: none;
+    }
+
+    button {
+      background-color: #6c63ff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #574b90;
+    }
+
+    #counter {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #444;
+      text-align: center;
+    }
+
+    #message {
+      margin-top: 20px;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- tsParticles CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+</head>
+<body>
+
+<!-- Sprinkle Particle Background -->
+<div id="tsparticles"></div>
+
+<form id="regForm">
+  <h2>Register for Tech for Girls</h2>
+  <input type="text" id="name" placeholder="Name" required />
+  <input type="tel" id="phone" placeholder="Phone Number" required />
+  <input type="email" id="email" placeholder="Email" required />
+  <input type="text" id="college" placeholder="College / Department" required />
+  
+  <button type="button" id="whatsappShare">📲 Share on WhatsApp</button>
+  <div id="counter">Click count: 0/5</div>
+  
+  <input type="file" id="screenshot" required />
+  
+  <button type="submit" id="submitBtn" disabled>Submit Registration</button>
+  
+  <div id="message"></div>
+</form>
+
+<script>
+  // Sprinkle Effect Initialization
+  tsParticles.load("tsparticles", {
+    fullScreen: { enable: false },
+    background: { color: "transparent" },
+    particles: {
+      number: { value: 80, density: { enable: true, value_area: 800 } },
+      color: { value: ["#ffffff", "#fbc2eb", "#d291bc"] },
+      shape: { type: "circle" },
+      opacity: { value: 0.6 },
+      size: { value: 3 },
+      move: { enable: true, speed: 0.8, direction: "none", outModes: "bounce" }
+    },
+    interactivity: {
+      events: { onHover: { enable: true, mode: "repulse" }, resize: true },
+      modes: { repulse: { distance: 50 } }
+    }
+  });
+
+  // Registration logic
+  let clickCount = 0;
+  const counter = document.getElementById('counter');
+  const shareBtn = document.getElementById('whatsappShare');
+  const submitBtn = document.getElementById('submitBtn');
+  const message = document.getElementById('message');
+
+  if (localStorage.getItem('formSubmitted')) {
+    document.getElementById('regForm').innerHTML = "🎉 Your submission has been recorded. Thanks for being part of Tech for Girls!";
+  }
+
+  shareBtn.onclick = () => {
+    if (clickCount >= 5) return;
+
+    const shareMessage = "Hey Buddy, Join Tech For Girls Community";
+    const url = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
+    window.open(url, '_blank');
+    clickCount++;
+    counter.textContent = `Click count: ${clickCount}/5`;
+
+    if (clickCount === 5) {
+      counter.textContent += " ✅ Sharing complete. Please continue.";
+      submitBtn.disabled = false;
+    }
+  };
+
+  document.getElementById('regForm').onsubmit = async (e) => {
+    e.preventDefault();
+    if (clickCount < 5) {
+      alert("Please complete sharing before submitting.");
+      return;
+    }
+
+    submitBtn.disabled = true;
+    const formData = new FormData();
+    formData.append('name', document.getElementById('name').value);
+    formData.append('phone', document.getElementById('phone').value);
+    formData.append('email', document.getElementById('email').value);
+    formData.append('college', document.getElementById('college').value);
+    formData.append('screenshot', document.getElementById('screenshot').files[0]);
+
+    try {
+      const response = await fetch('YOUR_GOOGLE_SCRIPT_WEB_APP_URL', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.text();
+      message.textContent = "🎉 Your submission has been recorded. Thanks for being part of Tech for Girls!";
+      localStorage.setItem('formSubmitted', 'true');
+      document.getElementById('regForm').reset();
+    } catch (err) {
+      message.textContent = "❌ Something went wrong. Try again.";
+    }
+  };
+</script>
+</body>
+</html>
